@@ -3,10 +3,10 @@ use std::{cell::RefCell, rc::Rc};
 use v8::{HandleScope, Isolate};
 
 type GlobalContext = v8::Global<v8::Context>;
-type JsRuntimeStateRef = Rc<RefCell<JsRuntimeState>>;
+pub type JsRuntimeStateRef = Rc<RefCell<JsRuntimeState>>;
 
 pub struct JsRuntimeState {
-    context: Option<GlobalContext>,
+    pub context: Option<GlobalContext>,
 }
 
 impl JsRuntimeState {
@@ -26,5 +26,10 @@ impl JsRuntimeState {
         let state = isolate.get_slot::<JsRuntimeStateRef>().unwrap().clone();
         let ctx = &state.borrow().context;
         ctx.as_ref().unwrap().clone()
+    }
+
+    pub fn drop_context(isolate: &mut Isolate) {
+        let state = isolate.get_slot::<JsRuntimeStateRef>().unwrap().clone();
+        state.borrow_mut().context.take();
     }
 }

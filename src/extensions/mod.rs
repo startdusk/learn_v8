@@ -1,8 +1,23 @@
-use v8::{FunctionCallbackArguments, HandleScope, ReturnValue};
+use v8::{
+    ExternalReference, ExternalReferences, FunctionCallbackArguments, HandleScope, MapFnTo,
+    ReturnValue,
+};
 
 use crate::utils::execute_script;
+use lazy_static::lazy_static;
 
 const GLUE: &str = include_str!("glue.js");
+
+lazy_static! {
+    pub static ref EXTERNAL_REFERENCES: ExternalReferences = ExternalReferences::new(&[
+        ExternalReference {
+            function: MapFnTo::map_fn_to(print)
+        },
+        ExternalReference {
+            function: MapFnTo::map_fn_to(fetch)
+        }
+    ]);
+}
 
 pub struct Extensions;
 
@@ -38,6 +53,6 @@ fn print(scope: &mut HandleScope, args: FunctionCallbackArguments, mut rv: Retur
 
 fn fetch(scope: &mut HandleScope, args: FunctionCallbackArguments, mut rv: ReturnValue) {
     let url: String = serde_v8::from_v8(scope, args.get(0)).unwrap();
-    let result = reqwest::blocking::get(&url).unwrap().text().unwrap();
+    let result = reqwest::blocking::get(url).unwrap().text().unwrap();
     rv.set(serde_v8::to_v8(scope, result).unwrap());
 }

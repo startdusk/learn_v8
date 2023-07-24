@@ -1,9 +1,9 @@
-use learn_v8::{JsRuntime, JsRuntimeParams};
+use learn_v8::JsRuntime;
 
 fn main() {
     JsRuntime::init();
 
-    let mut runtime = JsRuntime::new(JsRuntimeParams::default());
+    let mut runtime = JsRuntime::new(None);
     let code = r#"
         function hello() {
             let result = print({a:1,b:2});
